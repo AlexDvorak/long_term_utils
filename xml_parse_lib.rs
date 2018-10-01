@@ -5,10 +5,6 @@ pub enum FeedVal {
 }
 pub fn dec_to_ascii(dec: u8, hashmap: &HashMap<u8, char>) -> char {
     let char_or_none = hashmap.get(&dec);
-    println!("{}", dec);
-    //if dec == Ok(0){ // 10 is ASCII for EOF
-    //return '`';
-    //}
     match char_or_none {
         Some(char) => char_or_none.unwrap().to_owned(),
         _ => '_',

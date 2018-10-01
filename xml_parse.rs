@@ -103,15 +103,10 @@ fn main() {
     ascii_map.insert(125, '}');
     ascii_map.insert(126, '~');
     let mut reader = BufReader::new(
-        File::open("/home/alexbrown/Music/.xml/tester_vim.xml").expect("open failed"),
+        File::open("/home/alexbrown/Music/.xml/tester_fmtted.xml").expect("open failed"),
     );
     let mut buffer = [0; 16];
-    // XML preprocess (using nvim -es) to be done by downloader)
-    // nvim -es
-    //     %s/  \+//g
-    //     %s/\n//g
-    // perl -pe
-    //     's|<\?.*?<item>|<channel><item>|'
+    let mut flag_pop_name: bool = false;
     let mut rec_tag_name: bool = false;
     let mut rec_tag_data: bool = false;
     let mut tag_collector_string: String;
@@ -126,27 +121,26 @@ fn main() {
             .iter()
             .map(|byte| dec_to_ascii(*byte, &ascii_map))
             .collect();
-        if bytes_read < 16{
-            println!("last read {}",bytes_read);
+        if bytes_read < 15{
             last_read = true;
         }
         'read_chunk: for byte in chunk.iter() {
-            if curr_byte == bytes_read && last_read{
-                break 'read_file;
-            }
+            print!("{:?}",tag_stack);
             // BEGIN CRAPPY PARSING
-            if byte == '<'{
+            if *byte == '<'{
                 if rec_tag_data{
                     tag_collector_string = tag_buff.clone().into_iter().collect();
+                    rec_tag_data = false;
+                    rec_tag_name = true;
                 }
-            } else if byte == '/'{
+            } else if *byte == '/'{
                 if rec_tag_name{
                     flag_pop_name = true;
                 }
-            } else if byte == '>'{
+            } else if *byte == '>'{
                 if flag_pop_name{
                     tag_collector_string = tag_buff.clone().into_iter().collect();
-                    if tag_stack.contains(tag_collector_string){
+                    if tag_stack.contains(&tag_collector_string){
                         rec_tag_name = false;
                         rec_tag_data = true;
                     }
@@ -157,10 +151,13 @@ fn main() {
                     rec_tag_data = true;
                 }
             } else {
-                tag_buff.push(byte);
+                tag_buff.push(*byte);
             }
             // END CRAPPY PARSING
             curr_byte +=1;
+            if curr_byte == bytes_read && last_read{
+                break 'read_file;
+            }
         }
     }
 }
