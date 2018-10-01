@@ -6,8 +6,6 @@ use xml_parse_lib::*;
 
 fn main() {
     let mut ascii_map: HashMap<u8, char> = HashMap::new();
-    let mut feed_tree: HashMap<String, FeedVal> = HashMap::new();
-    let mut stack: Vec<char> = Vec::new();
     let mut tag_buff: Vec<char> = Vec::new();
     ascii_map.insert(32, ' ');
     ascii_map.insert(33, '!');
@@ -125,7 +123,7 @@ fn main() {
     loop {
         curr_byte = 0;
         bytes_read = reader.read(&mut buffer[..]).unwrap();
-        let mut chunk: Vec<char> = buffer
+        let chunk: Vec<char> = buffer
             .iter()
             .map(|byte| dec_to_ascii(*byte, &ascii_map))
             .collect();
