@@ -119,21 +119,23 @@ fn main() {
     let mut tag_name: String;
     let mut tag_data: String;
     let mut is_first_byte: bool = false;
+    let mut bytes_read: usize;
+    let mut curr_byte = 1;
+    let mut last_read = false;
     loop {
-        reader.read(&mut buffer[..]).unwrap();
+        curr_byte = 0;
+        bytes_read = reader.read(&mut buffer[..]).unwrap();
         let mut chunk: Vec<char> = buffer
             .iter()
             .map(|byte| dec_to_ascii(*byte, &ascii_map))
             .collect();
         let mut found_eof: bool = false;
+        if bytes_read < 16{
+            println!("last read {}",bytes_read);
+            last_read = true;
+        }
         for byte in chunk.iter() {
             // DONT TOUCH THESE IF CONDITIONS
-            if *byte == '`' {
-                //EOF code from dec_to_ascii
-                println!("exited");
-                found_eof = true;
-                break;
-            }
             if rec_tag_name && !is_first_byte {
                 is_first_byte = false;
             }
@@ -163,6 +165,10 @@ fn main() {
                 rec_tag_name = true;
                 is_first_byte = false;
             }
+            if curr_byte == bytes_read && last_read{
+                break;
+            }
+            curr_byte +=1;
         }
         if found_eof {
             break;
