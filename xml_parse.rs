@@ -103,7 +103,7 @@ fn main() {
     ascii_map.insert(125, '}');
     ascii_map.insert(126, '~');
     let mut reader = BufReader::new(
-        File::open("/home/alexbrown/Music/.xml/tester_fmtted.xml").expect("open failed"),
+        File::open("./tester_fmtted.xml").expect("open failed"),
     );
     let mut buffer = [0; 16];
     let mut flag_pop_name: bool = false;
