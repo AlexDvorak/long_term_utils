@@ -121,31 +121,31 @@ fn main() {
             .iter()
             .map(|byte| dec_to_ascii(*byte, &ascii_map))
             .collect();
-        if bytes_read < 15{
+        if bytes_read < 15 {
             last_read = true;
         }
         'read_chunk: for byte in chunk.iter() {
             // BEGIN CRAPPY PARSING
-            if *byte == '<'{
-                if rec_tag_data{
+            if *byte == '<' {
+                if rec_tag_data {
                     tag_collector_string = tag_buff.clone().into_iter().collect();
                     rec_tag_data = false;
                     rec_tag_name = true;
                 }
-            } else if *byte == '/'{
-                if rec_tag_name{
+            } else if *byte == '/' {
+                if rec_tag_name {
                     flag_pop_name = true;
                 }
-            } else if *byte == '>'{
-                if flag_pop_name{
+            } else if *byte == '>' {
+                if flag_pop_name {
                     tag_collector_string = tag_buff.clone().into_iter().collect();
-                    if tag_stack.contains(&tag_collector_string){
+                    if tag_stack.contains(&tag_collector_string) {
                         rec_tag_name = false;
                         rec_tag_data = true;
                     }
-                }else{
+                } else {
                     tag_collector_string = tag_buff.clone().into_iter().collect();
-                    println!("pushing: {}",tag_collector_string);
+                    println!("pushing: {}", tag_collector_string);
                     tag_stack.push(tag_collector_string);
                     rec_tag_name = false;
                     rec_tag_data = true;
@@ -154,8 +154,8 @@ fn main() {
                 tag_buff.push(*byte);
             }
             // END CRAPPY PARSING
-            curr_byte +=1;
-            if curr_byte == bytes_read && last_read{
+            curr_byte += 1;
+            if curr_byte == bytes_read && last_read {
                 break 'read_file;
             }
         }
