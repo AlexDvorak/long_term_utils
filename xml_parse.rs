@@ -129,7 +129,6 @@ fn main() {
             .iter()
             .map(|byte| dec_to_ascii(*byte, &ascii_map))
             .collect();
-        let mut found_eof: bool = false;
         if bytes_read < 16{
             println!("last read {}",bytes_read);
             last_read = true;
@@ -169,9 +168,6 @@ fn main() {
                 break;
             }
             curr_byte +=1;
-        }
-        if found_eof {
-            break;
         }
     }
 }
