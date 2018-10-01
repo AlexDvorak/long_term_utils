@@ -120,7 +120,7 @@ fn main() {
     let mut bytes_read: usize;
     let mut curr_byte = 1;
     let mut last_read = false;
-    loop {
+    'read_file: loop {
         curr_byte = 0;
         bytes_read = reader.read(&mut buffer[..]).unwrap();
         let chunk: Vec<char> = buffer
@@ -131,8 +131,8 @@ fn main() {
             println!("last read {}",bytes_read);
             last_read = true;
         }
-        for byte in chunk.iter() {
-            // DONT TOUCH THESE IF CONDITIONS
+        'read_chunk: for byte in chunk.iter() {
+            // REDO THESE IF CONDITIONS
             if rec_tag_name && !is_first_byte {
                 is_first_byte = false;
             }
@@ -163,7 +163,7 @@ fn main() {
                 is_first_byte = false;
             }
             if curr_byte == bytes_read && last_read{
-                break;
+                break 'read_file;
             }
             curr_byte +=1;
         }
