@@ -125,7 +125,6 @@ fn main() {
             last_read = true;
         }
         'read_chunk: for byte in chunk.iter() {
-            print!("{:?}",tag_stack);
             // BEGIN CRAPPY PARSING
             if *byte == '<'{
                 if rec_tag_data{
@@ -146,6 +145,7 @@ fn main() {
                     }
                 }else{
                     tag_collector_string = tag_buff.clone().into_iter().collect();
+                    println!("pushing: {}",tag_collector_string);
                     tag_stack.push(tag_collector_string);
                     rec_tag_name = false;
                     rec_tag_data = true;
