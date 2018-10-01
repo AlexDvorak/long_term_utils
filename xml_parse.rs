@@ -114,12 +114,11 @@ fn main() {
     //     's|<\?.*?<item>|<channel><item>|'
     let mut rec_tag_name: bool = false;
     let mut rec_tag_data: bool = false;
-    let mut tag_name: String;
-    let mut tag_data: String;
-    let mut is_first_byte: bool = false;
+    let mut tag_collector_string: String;
     let mut bytes_read: usize;
     let mut curr_byte = 1;
     let mut last_read = false;
+    let mut tag_stack: Vec<String> = Vec::new();
     'read_file: loop {
         curr_byte = 0;
         bytes_read = reader.read(&mut buffer[..]).unwrap();
@@ -132,39 +131,35 @@ fn main() {
             last_read = true;
         }
         'read_chunk: for byte in chunk.iter() {
-            // REDO THESE IF CONDITIONS
-            if rec_tag_name && !is_first_byte {
-                is_first_byte = false;
-            }
-            if byte.to_owned() != '<' && rec_tag_name == false {
-                rec_tag_data = true;
-            }
-            if byte.to_owned() == '<' && (rec_tag_name == false) {
-                rec_tag_name = true;
-                rec_tag_data = false;
-                is_first_byte = true;
-                rec_tag_data = false;
-            } else if byte.to_owned() == '<' && rec_tag_data {
-                // detect start of tag name
-                tag_data = tag_buff.clone().into_iter().collect();
-                tag_buff = Vec::new();
-                rec_tag_name = true;
-                rec_tag_data = false;
-            } else if rec_tag_name && byte.to_owned() == '>' {
-                // detect end of tag name
-                tag_name = tag_buff.clone().into_iter().collect();
-                let verdict_for_tag_name: (bool, String, bool) = data_to_FeedVal(true, tag_name);
-                tag_buff = Vec::new();
-                rec_tag_name = false;
-                rec_tag_data = false;
-            } else {
-                tag_buff.push(byte.to_owned());
-                rec_tag_name = true;
-                is_first_byte = false;
-            }
             if curr_byte == bytes_read && last_read{
                 break 'read_file;
             }
+            // BEGIN CRAPPY PARSING
+            if byte == '<'{
+                if rec_tag_data{
+                    tag_collector_string = tag_buff.clone().into_iter().collect();
+                }
+            } else if byte == '/'{
+                if rec_tag_name{
+                    flag_pop_name = true;
+                }
+            } else if byte == '>'{
+                if flag_pop_name{
+                    tag_collector_string = tag_buff.clone().into_iter().collect();
+                    if tag_stack.contains(tag_collector_string){
+                        rec_tag_name = false;
+                        rec_tag_data = true;
+                    }
+                }else{
+                    tag_collector_string = tag_buff.clone().into_iter().collect();
+                    tag_stack.push(tag_collector_string);
+                    rec_tag_name = false;
+                    rec_tag_data = true;
+                }
+            } else {
+                tag_buff.push(byte);
+            }
+            // END CRAPPY PARSING
             curr_byte +=1;
         }
     }
